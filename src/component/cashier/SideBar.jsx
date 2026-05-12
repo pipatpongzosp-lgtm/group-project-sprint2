@@ -1,4 +1,3 @@
-// src/components/common/Sidebar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -11,11 +10,11 @@ import {
 
 const Sidebar = () => {
   const navItems = [
-    { name: "แผนผัง", icon: LayoutGrid, path: "/waiter/tables" }, // สมมติว่าเชื่อมไปหน้าของเพื่อน
-    { name: "ออเดอร์", icon: ClipboardList, path: "/waiter/orders" },
+    { name: "แผนผัง", icon: LayoutGrid, path: "/shared/tables" },
+    { name: "ออเดอร์", icon: ClipboardList, path: "/cashier/orders" },
     { name: "เก็บเงิน", icon: Banknote, path: "/cashier/checkout" },
     { name: "ประวัติ", icon: History, path: "/cashier/history" },
-    { name: "ตั้งค่า", icon: Settings, p                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ath: "/settings" },
+    { name: "ตั้งค่า", icon: Settings, path: "/settings" },
   ];
 
   return (

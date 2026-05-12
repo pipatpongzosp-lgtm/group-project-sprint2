@@ -21,6 +21,14 @@ const OrderDetail = () => {
   const navigate = useNavigate();
   const { orderId } = useParams();
 
+  const [currentStage, setCurrentStage] = useState(1);
+  const [showCamera, setShowCamera] = useState(false);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [riderNote, setRiderNote] = useState("");
+
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+
   // ดึงข้อมูลออเดอร์จากพารามิเตอร์ URL
   const currentOrder = orders.find(o => o.id === orderId);
   const isReadyToDeliver = currentOrder?.orderList?.every(item => item.status === "finished");
@@ -51,14 +59,6 @@ const OrderDetail = () => {
 
   // คำนวณราคาทั้งหมดจาก orderList
   const totalPrice = currentOrder.orderList.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-
-  const [currentStage, setCurrentStage] = useState(1);
-  const [showCamera, setShowCamera] = useState(false);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const [riderNote, setRiderNote] = useState("");
-
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
 
   const startCamera = async () => {
     setShowCamera(true);

@@ -1,12 +1,10 @@
 // src/pages/customer/MenuPage.jsx
-import React, { useState, useEffect, useContext } from "react"; // <-- เพิ่ม useContext
-import { NavLink, useNavigate } from "react-router-dom"; // <-- เพิ่ม useNavigate
-import { HandFist, ShoppingCart, ArrowRight, CheckCircle } from "lucide-react";
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ShoppingCart, ArrowRight, CheckCircle, MapPin } from "lucide-react";
 import MenuCard from "../../component/customer/MenuCard";
 import CartSidebar from "../../component/customer/CartSidebar";
-import { OrdersContext } from "../../context/ordersContext/OrdersContext"; // <-- Import Context ของตะกร้า
-import { useSearchParams } from "react-router-dom";
-import { ArrowRight, CheckCircle, MapPin } from "lucide-react";
+import { OrdersContext } from "../../context/ordersContext/OrdersContext";
 import ProductModal from "../../component/customer/ProductModal";
 import {
   PROMOTIONS,
@@ -16,10 +14,10 @@ import {
 } from "../../assets/menuData";
 
 const MenuPage = () => {
-  const PROMOS = menuData;
-  const navigate = useNavigate(); // <-- ประกาศใช้ navigate เพื่อเปลี่ยนหน้า
-  // เรียกใช้ Context ของตะกร้าเพื่อส่งข้อมูลข้ามหน้า
-  const { orderList, setOrderList } = useContext(OrdersContext);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { setOrderList } = useContext(OrdersContext);
+
   // --- States ---
   const [activeTab, setActiveTab] = useState("all");
   const [cart, setCart] = useState(() => {
@@ -27,16 +25,13 @@ const MenuPage = () => {
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // อ่าน URL ว่าสั่งเปิดตะกร้ามาไหม (?cart=open)
   const [isCartOpen, setIsCartOpen] = useState(
     searchParams.get("cart") === "open",
   );
   const [toastMsg, setToastMsg] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
-
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // Modal สาขา ไม่เด้งขัดจังหวะตอนเริ่ม
   const [selectedBranch, setSelectedBranch] = useState(() =>
     localStorage.getItem("selectedBranch"),
   );
@@ -48,11 +43,11 @@ const MenuPage = () => {
     const currentTab = searchParams.get("tab");
     if (currentTab) setActiveTab(currentTab);
 
-    // ถ้า URL สั่งเปิดตะกร้า ให้เปิด Sidebar แล้วล้าง URL ทิ้ง (จะได้ไม่เด้งซ้ำตอนรีเฟรช)
     if (searchParams.get("cart") === "open") {
       setIsCartOpen(true);
-      searchParams.delete("cart");
-      setSearchParams(searchParams, { replace: true });
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("cart");
+      setSearchParams(newParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
@@ -68,14 +63,15 @@ const MenuPage = () => {
   }, []);
 
   // --- Functions ---
-  const handleAddToCart = (id, name) => {
-    // 1. ดึงข้อมูลเมนูแบบเต็มมาจาก MENU array
-    const fullMenuItem = MENU.find((m) => m.id === id);
-
-    // 2. อัปเดตตะกร้า Local (สำหรับ Sidebar ปกติของคุณ)
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    setSearchParams(tabId === "all" ? {} : { tab: tabId });
+    if (tabId === "all") {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("tab");
+      setSearchParams(newParams);
+    } else {
+      setSearchParams({ tab: tabId });
+    }
   };
 
   const handleSelectBranch = (branchId) => {
@@ -112,8 +108,9 @@ const MenuPage = () => {
     }
   };
 
-  // ฟังก์ชันใส่ตะกร้า (แก้ให้ "แอดเงียบๆ" ไม่เปิด Sidebar อัตโนมัติ)
   const executeAddToCart = (id, name, qty = 1) => {
+    const fullMenuItem = MENU.find((m) => m.id === id);
+
     setCart((prev) => {
       const existing = prev.find((item) => item.id === id);
       if (existing) {
@@ -124,48 +121,39 @@ const MenuPage = () => {
       return [...prev, { id, qty }];
     });
 
-    // 3. อัปเดตข้อมูลส่งไปหน้า OrderPage ผ่าน Context
     setOrderList((prevOrders) => {
-      // สมมติว่าตะกร้าปัจจุบันคือ Order ก้อนแรก (หรือสร้างใหม่ถ้ายังไม่มี)
       let currentOrder =
         prevOrders.length > 0
           ? { ...prevOrders[0] }
           : { orderId: Date.now().toString(), orderList: [] };
+      
       let listKey = currentOrder.List ? "List" : "orderList";
-      let currentItems = currentOrder[listKey] || [];
+      let currentItems = [...(currentOrder[listKey] || [])];
 
-      // เช็คว่ามีสินค้านี้ใน Context หรือยัง
       const existingItemIndex = currentItems.findIndex(
         (item) => item.id === id,
       );
 
       if (existingItemIndex >= 0) {
-        // ถ้ามีแล้ว เพิ่ม quantity
-        currentItems[existingItemIndex].quantity += 1;
+        currentItems[existingItemIndex].quantity += qty;
       } else {
-        // ถ้ายังไม่มี เพิ่ม item ใหม่เข้าไป โดยจัด Format ให้ตรงกับที่ OrderPage ต้องการ
         currentItems.push({
           id: id,
           name: name,
-          price: fullMenuItem ? fullMenuItem.price : 0, // ส่งราคาไปด้วย
+          price: fullMenuItem ? fullMenuItem.price : 0,
           emoji: fullMenuItem ? fullMenuItem.emoji : "🍗",
-          quantity: 1,
+          quantity: qty,
           note: "None",
           size: "Regular",
         });
       }
 
       currentOrder[listKey] = currentItems;
-      return [currentOrder]; // อัปเดต Context
+      return [currentOrder];
     });
-    navigate("/order");
 
-    // โชว์ Toast
     setToastMsg(`Added: ${name}`);
     setTimeout(() => setToastMsg(""), TOAST_DURATION_MS);
-
-    // ปิดบรรทัดข้างล่างนี้ เพื่อไม่ให้ Sidebar เด้งรบกวนลูกค้าตอนกดแอด
-    // setIsCartOpen(true);
   };
 
   const handleUpdateQty = (id, delta) => {
@@ -245,8 +233,8 @@ const MenuPage = () => {
             >
               <div className="absolute inset-0">
                 <img
-                  src={promo.image}
-                  alt={promo.name}
+                  src={promo.img}
+                  alt={promo.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src =
@@ -260,7 +248,7 @@ const MenuPage = () => {
                   {promo.tag}
                 </span>
                 <h2 className="font-['Bebas_Neue'] text-5xl leading-[0.9] my-2 drop-shadow-md">
-                  {promo.name}
+                  {promo.title}
                 </h2>
                 <div className="font-['Bebas_Neue'] text-4xl mb-4">
                   {promo.price}
@@ -353,8 +341,7 @@ const MenuPage = () => {
       {/* --- MOBILE CART STICKY BAR --- */}
       <div
         className="md:hidden fixed bottom-0 left-0 right-0 bg-[#242424] p-4 flex justify-between items-center text-white z-40 border-t-4 border-[#e4002b] cursor-pointer"
-        // onClick={() => setIsCartOpen(true)} // <-- เอาของเก่าที่เปิด Sidebar ออก
-        onClick={() => navigate("/order")} // <-- สั่งให้เปลี่ยน URL ไปหน้าตะกร้า (เปลี่ยน path "/order" ตามที่คุณตั้งค่า Route ไว้)
+        onClick={() => navigate("/order")}
       >
         <div>
           <div className="text-xs opacity-60 uppercase font-bold">
@@ -367,9 +354,9 @@ const MenuPage = () => {
             VIEW CART <ArrowRight size={16} />
           </button>
         </div>
-      )}
+      </div>
 
-      {/* Toast Noti (บอกว่าแอดสำเร็จแล้ว) */}
+      {/* Toast Noti */}
       <div
         className={`fixed bottom-8 right-8 bg-[#242424] text-white px-6 py-4 rounded-lg shadow-2xl border-l-4 border-[#e4002b] flex items-center gap-3 transition-all duration-300 z-60 ${toastMsg ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0 pointer-events-none"}`}
       >
@@ -377,7 +364,7 @@ const MenuPage = () => {
         <span className="font-bold">{toastMsg}</span>
       </div>
 
-      {/* Product Modal (ถ้ากดปุ่ม Add ตรงนี้ Sidebar ก็จะไม่เด้งเช่นกัน) */}
+      {/* Product Modal */}
       <ProductModal
         isOpen={!!selectedItem}
         onClose={() => setSelectedItem(null)}
@@ -387,7 +374,7 @@ const MenuPage = () => {
         }
       />
 
-      {/* Cart Sidebar (ตะกร้า) ตั้งค่า z-index ให้สูงสุดเพื่อไม่ให้ Navbar บัง */}
+      {/* Cart Sidebar */}
       <div className="relative z-9999">
         <CartSidebar
           isOpen={isCartOpen}
