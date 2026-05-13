@@ -14,7 +14,7 @@ const PickupConfirmation = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/90 backdrop-blur-sm flex justify-center items-center z-[1000]"
+      className="fixed inset-0 bg-black/90 backdrop-blur-sm flex justify-center items-center z-1000"
       onClick={onClose}
     >
       <div
