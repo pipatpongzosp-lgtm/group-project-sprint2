@@ -1,5 +1,7 @@
-import { UserContext } from "./UserContext";
+// คอยจำว่า "ตอนนี้ใคร Login อยู่" โดยดึงข้อมูลจาก localStorage
+
 import { useState, useEffect } from "react";
+import { UserContext } from "./UserContext";
 
 export const UserProvider = ({ children }) => {
   // Added safe parsing (try-catch) and null check.

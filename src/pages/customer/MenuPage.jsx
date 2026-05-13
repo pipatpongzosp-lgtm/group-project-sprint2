@@ -1,9 +1,16 @@
 // src/pages/customer/MenuPage.jsx
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { ShoppingCart, ArrowRight, CheckCircle, MapPin } from "lucide-react";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  HandFist,
+  ShoppingCart,
+  ArrowRight,
+  CheckCircle,
+  MapPin,
+} from "lucide-react";
 import MenuCard from "../../component/customer/MenuCard";
 import CartSidebar from "../../component/customer/CartSidebar";
+import LoginModal from "../../component/LoginModal"; // ✅ นำเข้า LoginModal
 import { OrdersContext } from "../../context/ordersContext/OrdersContext";
 import ProductModal from "../../component/customer/ProductModal";
 import {
@@ -16,7 +23,7 @@ import {
 const MenuPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setOrderList } = useContext(OrdersContext);
+  const { orderList, setOrderList } = useContext(OrdersContext);
 
   // --- States ---
   const [activeTab, setActiveTab] = useState("all");
@@ -28,10 +35,15 @@ const MenuPage = () => {
   const [isCartOpen, setIsCartOpen] = useState(
     searchParams.get("cart") === "open",
   );
+
+  // ✅ เพิ่ม State สำหรับควบคุมการเปิด/ปิด Login Modal
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   const [toastMsg, setToastMsg] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
 
+  // Modal สาขา
   const [selectedBranch, setSelectedBranch] = useState(() =>
     localStorage.getItem("selectedBranch"),
   );
@@ -108,6 +120,7 @@ const MenuPage = () => {
     }
   };
 
+  // ฟังก์ชันใส่ตะกร้า
   const executeAddToCart = (id, name, qty = 1) => {
     const fullMenuItem = MENU.find((m) => m.id === id);
 
@@ -255,7 +268,7 @@ const MenuPage = () => {
                 </div>
                 <button
                   onClick={() => alert("โปรโมชั่นคอมโบเซตจะมาในเฟสถัดไปครับ!")}
-                  className="bg-[#e4002b] text-white px-8 py-3 rounded-md font-bold font-['Bebas_Neue'] text-xl hover:bg-white hover:text-black transition shadow-lg"
+                  className="bg-[#e4002b] text-white px-8 py-3 rounded-md font-bold font-['Bebas_Neue'] text-xl hover:bg-white hover:text-black transition shadow-lg cursor-pointer"
                 >
                   ORDER NOW
                 </button>
@@ -267,7 +280,7 @@ const MenuPage = () => {
               <button
                 key={i}
                 onClick={() => setCurrentSlide(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === currentSlide ? "bg-[#e4002b] scale-150" : "bg-white/40"}`}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === currentSlide ? "bg-[#e4002b] scale-150" : "bg-white/40"} cursor-pointer`}
               />
             ))}
           </div>
@@ -286,7 +299,7 @@ const MenuPage = () => {
             {selectedBranch ? (
               <button
                 onClick={() => setIsBranchModalOpen(true)}
-                className="flex items-center gap-2 bg-white border-2 border-[#242424] px-4 py-2 rounded-lg shadow-[4px_4px_0_#242424] hover:bg-gray-100 transition-colors text-sm font-bold"
+                className="flex items-center gap-2 bg-white border-2 border-[#242424] px-4 py-2 rounded-lg shadow-[4px_4px_0_#242424] hover:bg-gray-100 transition-colors text-sm font-bold cursor-pointer"
               >
                 <MapPin size={16} className="text-[#e4002b]" /> Store:{" "}
                 {selectedBranch === "branch1" ? "Asok (HQ)" : selectedBranch}
@@ -294,7 +307,7 @@ const MenuPage = () => {
             ) : (
               <button
                 onClick={() => setIsBranchModalOpen(true)}
-                className="flex items-center gap-2 bg-[#e4002b] text-white border-2 border-[#242424] px-4 py-2 rounded-lg shadow-[4px_4px_0_#242424] hover:bg-black transition-colors text-sm font-bold animate-pulse"
+                className="flex items-center gap-2 bg-[#e4002b] text-white border-2 border-[#242424] px-4 py-2 rounded-lg shadow-[4px_4px_0_#242424] hover:bg-black transition-colors text-sm font-bold animate-pulse cursor-pointer"
               >
                 <MapPin size={16} /> Choose Store
               </button>
@@ -316,7 +329,7 @@ const MenuPage = () => {
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`px-6 py-2 rounded-md font-bold whitespace-nowrap transition-colors border-2 ${activeTab === tab.id ? "bg-[#242424] text-white border-[#242424]" : "border-[#242424] text-[#242424] hover:bg-gray-200"}`}
+                className={`px-6 py-2 rounded-md font-bold whitespace-nowrap transition-colors border-2 cursor-pointer ${activeTab === tab.id ? "bg-[#242424] text-white border-[#242424]" : "border-[#242424] text-[#242424] hover:bg-gray-200"}`}
               >
                 {tab.label}
               </button>
@@ -350,10 +363,10 @@ const MenuPage = () => {
           <div className="text-xl font-black text-[#e4002b]">
             ฿{totalPrice.toLocaleString()}.-
           </div>
-          <button className="bg-[#e4002b] px-6 py-2 rounded-full font-black text-sm font-['Bebas_Neue'] shadow-lg flex items-center gap-2">
-            VIEW CART <ArrowRight size={16} />
-          </button>
         </div>
+        <button className="bg-[#e4002b] px-6 py-2 rounded-full font-black text-sm font-['Bebas_Neue'] shadow-lg flex items-center gap-2 cursor-pointer">
+          VIEW CART <ArrowRight size={16} />
+        </button>
       </div>
 
       {/* Toast Noti */}
@@ -375,14 +388,21 @@ const MenuPage = () => {
       />
 
       {/* Cart Sidebar */}
-      <div className="relative z-9999">
+      <div className="relative z-9998">
         <CartSidebar
           isOpen={isCartOpen}
           onClose={() => setIsCartOpen(false)}
           cartItems={cart}
           onUpdateQty={handleUpdateQty}
+          onOpenLoginModal={() => setIsLoginModalOpen(true)} // ✅ ส่ง Props ตัวนี้เข้าไป
         />
       </div>
+
+      {/* LoginModal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   );
 };
