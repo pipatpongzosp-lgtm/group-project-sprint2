@@ -2,13 +2,12 @@ import React from "react";
 
 const PickupConfirmation = ({ 
   isOpen, 
-  onClose,
-  status = "", 
-  orderNo = "",
-  timeDelivery = "",
-  menuList = [],
-  totalPrice = "",
-  contact = "" 
+  onClose, 
+  tableNo = "",
+  detail = "", 
+  person = "", 
+  date = "",
+  time = "" 
 }) => {
   if (!isOpen) return null;
 
@@ -22,23 +21,13 @@ const PickupConfirmation = ({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-['Bebas_Neue'] text-4xl mb-6 text-center uppercase tracking-wider">
-          Order Status.
+          Reserve Confirmation
         </h2>
 
         <div className="space-y-4 mb-8">
           <div className="flex flex-col">
-            <span className="text-[#888888] text-sm uppercase font-bold">- Status :</span>
-            <span className="pl-4 text-white font-mono">{status || "N/A"}</span>
-          </div>
-
-           <div className="flex flex-col">
-            <span className="text-[#888888] text-sm uppercase font-bold">- Time Delivery :</span>
-            <span className="pl-4 text-white font-mono">{timeDelivery || "N/A"}</span>
-          </div>
-
-          <div className="flex flex-col">
             <span className="text-[#888888] text-sm uppercase font-bold">- Order no :</span>
-            <span className="pl-4 text-white font-mono">{orderNo || "N/A"}</span>
+            <span className="pl-4 text-white font-mono">{tableNo || "N/A"}</span>
           </div>
 
           <div className="flex flex-col">
@@ -59,19 +48,35 @@ const PickupConfirmation = ({
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[#888888] text-sm uppercase font-bold">- Total Price :</span>
-            <span className="pl-4 text-white text-lg font-bold">฿{totalPrice}</span>
+            <span className="text-[#888888] text-sm uppercase font-bold">- Details :</span>
+            <span className="pl-4 text-white text-lg font-bold">{detail}</span>
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[#888888] text-sm uppercase font-bold">- Contact :</span>
-            <span className="pl-4 text-white text-lg font-bold">{contact}</span>
+            <span className="text-[#888888] text-sm uppercase font-bold">- Person :</span>
+            <span className="pl-4 text-white">{person || "N/A"}</span>
           </div>
 
+          <div className="flex flex-col">
+            <span className="text-[#888888] text-sm uppercase font-bold">- Date :</span>
+            <span className="pl-4 text-white">{date || "N/A"}</span>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[#888888] text-sm uppercase font-bold">- Time :</span>
+            <span className="pl-4 text-white">{time || "N/A"}</span>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[#888888] text-sm uppercase font-bold">- Comment :</span>
+            <p className="pl-4 text-white text-sm italic">
+              {comment || "No comment"}
+            </p>
+          </div>
         </div>
 
         <p className="text-[#e4002b] text-[15px] text-center mb-6 leading-relaxed">
-          กรุณาชำระค่าอาหารที่เคานเตอร์ หรือ กรุณารอพนักงานชำระที่โต๊ะ
+          *โปรดแสดงตั๋วจองเมื่อมาถึงร้าน และควรมาถึงร้านก่อนเวลา 10:00 นาที
         </p>
 
         <div className="flex justify-center">
@@ -79,7 +84,7 @@ const PickupConfirmation = ({
             onClick={onClose}
             className="px-10 py-3 border-2 border-[#555] text-[#888] font-bold text-sm uppercase rounded hover:bg-[#333] hover:text-white transition-colors"
           >
-            ยกเลิก
+            CLOSE
           </button>
         </div>
       </div>
